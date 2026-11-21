@@ -7,18 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from google.genai import types
 from pydantic import BaseModel
 
-# importa o seu agente (o nome começa com número, por isso importlib)
 agente = importlib.import_module("04_agente_nutri")
 
 app = FastAPI(title="API Nutri IA")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # para demo; em produção, restrinja
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-sessoes = {}  # session_id -> conversa
+sessoes = {}
 MAX_SESSOES = 200
 
 
@@ -27,12 +26,7 @@ def nova_conversa():
         model=agente.MODELO_CHAT,
         config=types.GenerateContentConfig(
             system_instruction=agente.SYSTEM,
-            tools=[
-                agente.buscar_receitas,
-                agente.listar_receitas,
-                agente.receitas_sem,
-                agente.consultar_manual_app,
-            ],
+            tools=agente.TOOLS,
             temperature=0.3,
         ),
     )
@@ -57,7 +51,7 @@ def chat(p: Pergunta):
     sid = p.session_id or str(uuid.uuid4())
     if sid not in sessoes:
         if len(sessoes) >= MAX_SESSOES:
-            sessoes.pop(next(iter(sessoes)))  # remove a mais antiga
+            sessoes.pop(next(iter(sessoes)))
         sessoes[sid] = nova_conversa()
 
     for i in range(3):
