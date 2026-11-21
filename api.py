@@ -1,9 +1,11 @@
 import importlib
 import time
+import traceback
 import uuid
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from google.genai import types
 from pydantic import BaseModel
 
@@ -37,6 +39,15 @@ class Pergunta(BaseModel):
     session_id: str | None = None
 
 
+@app.exception_handler(Exception)
+async def erro_global(request: Request, exc: Exception):
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"erro": True, "tipo": type(exc).__name__, "detalhe": str(exc)[:500]},
+    )
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -62,8 +73,8 @@ def chat(p: Pergunta):
                 "resposta": resposta or "Não consegui responder agora. Pode reformular?",
                 "erro": False,
             }
-        except Exception as e:
-            print(f"[erro tentativa {i + 1}] {e}")
+        except Exception:
+            traceback.print_exc()
             time.sleep(2 * (i + 1))
 
     return {
