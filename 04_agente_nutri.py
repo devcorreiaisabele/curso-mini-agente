@@ -42,35 +42,45 @@ def health():
     return {"status": "ok"}
 
 
+import traceback
+from fastapi.responses import JSONResponse
+
 @app.post("/chat")
 def chat(p: Pergunta):
-    texto = (p.mensagem or "").strip()
-    if not texto:
-        return {"session_id": p.session_id, "resposta": "Pode me dizer como posso ajudar? 💚", "erro": False}
+    try:
+        texto = (p.mensagem or "").strip()
+        if not texto:
+            return {"session_id": p.session_id, "resposta": "Pode me dizer como posso ajudar? 💚", "erro": False}
 
-    sid = p.session_id or str(uuid.uuid4())
-    if sid not in sessoes:
-        if len(sessoes) >= MAX_SESSOES:
-            sessoes.pop(next(iter(sessoes)))
-        sessoes[sid] = nova_conversa()
+        sid = p.session_id or str(uuid.uuid4())
+        if sid not in sessoes:
+            if len(sessoes) >= MAX_SESSOES:
+                sessoes.pop(next(iter(sessoes)))
+            sessoes[sid] = nova_conversa()
 
-    for i in range(3):
-        try:
-            resposta = sessoes[sid].send_message(texto).text
-            return {
-                "session_id": sid,
-                "resposta": resposta or "Não consegui responder agora. Pode reformular?",
-                "erro": False,
-            }
-        except Exception as e:
-            print(f"[erro tentativa {i + 1}] {e}")
-            time.sleep(2 * (i + 1))
+        for i in range(3):
+            try:
+                resposta = sessoes[sid].send_message(texto).text
+                return {
+                    "session_id": sid,
+                    "resposta": resposta or "Não consegui responder agora. Pode reformular?",
+                    "erro": False,
+                }
+            except Exception as e:
+                traceback.print_exc()
+                time.sleep(2 * (i + 1))
 
-    return {
-        "session_id": sid,
-        "resposta": "Estou com instabilidade agora. Tenta de novo em instantes 💚",
-        "erro": True,
-    }
+        return {
+            "session_id": sid,
+            "resposta": "Estou com instabilidade agora. Tenta de novo em instantes 💚",
+            "erro": True,
+        }
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"resposta": f"Erro interno: {type(e).__name__}: {e}", "erro": True},
+        )
 
 
 @app.delete("/chat/{session_id}")
