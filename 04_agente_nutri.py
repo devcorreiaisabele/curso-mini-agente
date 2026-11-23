@@ -159,7 +159,7 @@ def consultar_manual_app(pergunta: str) -> dict:
         Trechos relevantes do manual.
     """
     try:
-        resultado = colecao.query(query_texts=[pergunta], n_results=4)
+        resultado = colecao.query(query_texts=[pergunta], n_results=8)
         return {"trechos": resultado["documents"][0]}
     except Exception as e:
         return {"erro": f"Falha ao consultar o manual: {e}"}
@@ -171,6 +171,7 @@ uma plataforma de nutrição. Você ajuda com (1) as receitas cadastradas no app
 
 # ESCOPO
 - Responda APENAS sobre o app Nutri e as receitas cadastradas nele.
+- Isso inclui o funcionamento do app Nutri+: telas, cadastro e login (paciente e nutricionista), aba de receitas, botão "Comi esta receita", cálculo de gasto energético, metas e registro de peso, lembretes de refeições, dashboard do paciente e painel do nutricionista. Para essas dúvidas, use consultar_manual_app.
 - Se a pergunta fugir disso (geografia, política, programação, etc.), recuse com educação
   em uma frase e volte ao tema. Ex: "Isso foge do que eu sei fazer por aqui 😊 Mas posso
   te ajudar com receitas ou com o uso do Nutri. O que você precisa?"
@@ -187,6 +188,12 @@ uma plataforma de nutrição. Você ajuda com (1) as receitas cadastradas no app
 - Sugestões gerais, critérios (calorias, tempo, proteína) e lista de receitas: listar_receitas.
   Se a pessoa já citou alguma restrição, use receitas_sem em vez de listar_receitas.
 - Dúvidas de uso do app: consultar_manual_app.
+- Opções disponíveis no cadastro do paciente (conteúdo do manual, pode ser informado
+  diretamente): Estilo alimentar: Onívora, Vegana, Vegetariana ou Pescetariana.
+  Preferências e restrições: Sem Glúten, Sem Lactose, Alergia a Nozes, Ingredientes
+  Regionais, Low Carb, entre outros. Restrições religiosas ou adicionais: Nenhuma, Halal
+  (Islâmica), Kosher (Judaica), Cristianismo ou Hinduismo. Alergias e intolerâncias
+  específicas: Sem Glúten, Sem Lactose, Amendoim, Nozes, Crustáceos, Ovos, entre outros.
 - NUNCA invente receitas, ingredientes, valores nutricionais ou funcionalidades do app.
   Use somente o que as ferramentas retornarem. A única exceção são adaptações da receita que
   a pessoa está vendo (omitir ou substituir um ingrediente), sempre marcadas como SUGESTÃO.

@@ -39,11 +39,18 @@ colecao.upsert(ids=ids, documents=chunks)
 print(f"{len(chunks)} chunks salvos com sucesso!")
 
 # 4. TESTE DE BUSCA SEMÂNTICA
-pergunta = "Qual é a política de garantia e devolução?"
-resultado = colecao.query(
-    query_texts=[pergunta], n_results=1
-)
+perguntas = [
+    "O que o nutricionista pode editar no seu perfil?",
+    "Como funciona o cálculo de gasto energético?",
+    "O que o botão Comi esta receita faz?",
+]
+
 print("\n--- Teste de Busca ---")
-print("Pergunta:", pergunta)
-print("Trecho mais relevante encontrado:")
-print(resultado["documents"][0][0].strip())
+for pergunta in perguntas:
+    resultado = colecao.query(
+        query_texts=[pergunta], n_results=1
+    )
+    print("\nPergunta:", pergunta)
+    print("Trecho mais relevante encontrado:")
+    print(resultado["documents"][0][0].strip())
+    print("-" * 40)
